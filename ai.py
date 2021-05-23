@@ -14,6 +14,8 @@ class Agent:
         self.epsilon = 0
         self.gamma = 0
         self.memory = deque(maxlen=MAX_memory)
+        self.model = None #TODO
+        self.trainer = None #TODO
 
 
     def get_state(self, game):
@@ -59,14 +61,39 @@ class Agent:
             game.food.y < game.head.y,
             game.food.y > game.head.y
         ]
+
+        return np.array(state, dtype=int) 
+
     def remember(self, state, action, reward, next_state, done):
-        pass
+        self.memory.append((state, action, reward, next_state, done))
+    
     def train_long_memory(self):
-        pass
-    def train_short_memory(self):
-        pass
+        if len(self.memory)< Batch_size:
+            mini_sample = random.sample(self.memory, Batch_size)
+        else:
+            mini_sample = self.memory
+
+        states, actions, rewards, next_states, dones = zip(*mini_sample)
+        self.trainer.train_step(states, actions, rewards, next_states, dones)
+        #for state, action, reward, next_state, done in mini_sample: ##for test
+
+
+    def train_short_memory(self,state, action, reward, next_state, done):
+        self.trainer.train_step(state, action, reward, next_state, done)
+    
     def get_action(self, state):
-         pass
+        self.epsilon = 80 - self.n_games
+        final_move = [0,0,0]
+        if random.randint(0, 200) < self.epsilon:
+            move = random.randint(0, 2)
+            final_move[move] = 1
+        
+        else:
+            state0 = torch.tensor(state, dtype=torch.float)
+            prediction = self.model.predict(state0)
+            move = torch.argmax(prediction).item()
+            final_move[move] = 1
+        return final_move
 
 
 def train():
