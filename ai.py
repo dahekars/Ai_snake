@@ -28,7 +28,37 @@ class Agent:
         dir_u = game.direction == Direction.UP
         dir_d = game.direction == Direction.DOWN
 
-        
+        state = [
+            #danger straight
+            (dir_r and game.is_collision(point_r)) or 
+            (dir_l and game.is_collision(point_l)) or
+            (dir_u and game.is_collision(point_u)) or
+            (dir_u and game.is_collision(point_u)),
+
+            #danger RIGHT
+            (dir_u and game.is_collision(point_r)) or
+            (dir_d and game.is_collision(point_l)) or
+            (dir_l and game.is_collision(point_u)) or
+            (dir_r and game.is_collision(point_d)),
+
+            #danger LEFT
+            (dir_d and game.is_collision(point_r)) or
+            (dir_u and game.is_collision(point_l)) or
+            (dir_r and game.is_collision(point_u)) or
+            (dir_l and game.is_collision(point_d)),
+
+            # Move direction
+            dir_l,
+            dir_r,
+            dir_u, 
+            dir_d, 
+
+            #Food location
+            game.food.x < game.head.x, 
+            game.food.x > game.head.x, 
+            game.food.y < game.head.y,
+            game.food.y > game.head.y
+        ]
     def remember(self, state, action, reward, next_state, done):
         pass
     def train_long_memory(self):
